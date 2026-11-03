@@ -63,12 +63,12 @@ void opcontrol() {
 		
 		//Cascade
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1) && !master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-      		cascade_m1.move_voltage(12000);
-            cascade_m2.move_voltage(12000);
+      		cascade_m1.move(127);
+            cascade_m2.move(127);
     	}
     	else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-			cascade_m1.move_voltage(-12000);
-            cascade_m2.move_voltage(-12000);
+			cascade_m1.move(-127);
+            cascade_m2.move(-127);
     	}
     	else {
       		cascade_m1.move(0);
