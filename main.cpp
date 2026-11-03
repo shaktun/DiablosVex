@@ -3,9 +3,11 @@
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 pros::MotorGroup left_mg({1, 2});    
 pros::MotorGroup right_mg({-3, -4});
-pros::Motor cascade_mup(11);
-pros::Motor cascade_mdown(12);
+pros::Motor cascade_m1(11);
+pros::Motor cascade_m2(12);
 pros::Motor claw_m(15);
+pros::Distance sensor(16);
+pros::Motor toggle(18);
 pros::Motor intake_m1(19);
 pros::Motor intake_m2(20);
 
@@ -18,26 +20,34 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-    intake_m1.move(127);
-    intake_m2.move(-127);
+    bool isBlueTeam = true;
+    //true is blue  - santhosh radhakrishnan
+    while (sensor.get() > 150.0) {
+        left_mg.move(-80);
+        right_mg.move(-80);
 
-    left_mg.move(80);
-    right_mg.move(80);
-
-    pros::delay(1500);
+        pros::delay(20);
+    }
 
     left_mg.move(0);
     right_mg.move(0);
 
-    intake_m1.move(0);
-    intake_m2.move(0);
+    pros::delay(200);
 
-    cascade_mup.move(0);
-    cascade_mdown.move(0);
-    claw_m.move(0);
+    if (isBlueTeam) {
+        toggle.move(127);
+    } else {
+        toggle.move(-127);
+    }
+
+    pros::delay(500);
+
+    toggle.move(0);
+
+    pros::delay(20);
 }
 
-void opcontrol() {
+void opcontrol() {    
 	bool clawRunning = false;
 
 	while (true) {
@@ -53,16 +63,16 @@ void opcontrol() {
 		
 		//Cascade
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1) && !master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-      		cascade_mup.move(127);
-			cascade_mdown.move(127);
+      		cascade_m1.move_voltage(12000);
+            cascade_m2.move_voltage(12000);
     	}
     	else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && !master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-      		cascade_mdown.move(-127);
-			cascade_mup.move(-127);
+			cascade_m1.move_voltage(-12000);
+            cascade_m2.move_voltage(-12000);
     	}
     	else {
-      		cascade_mup.move(0);
-			cascade_mdown.move(0);
+      		cascade_m1.move(0);
+            cascade_m2.move(0);
     	}
 
 		//Claw
@@ -81,14 +91,12 @@ void opcontrol() {
         }
 
 		//Intake
-	
         if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)) {
             clawRunning = !clawRunning;
         }
-
         if (clawRunning) {
-            intake_m1.move(127);
-            intake_m2.move(-127);
+            intake_m1.move(-127);
+            intake_m2.move(127);
         } else {
             intake_m1.move(0);
             intake_m2.move(0);
